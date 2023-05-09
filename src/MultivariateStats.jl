@@ -121,6 +121,7 @@ module MultivariateStats
     include("lda.jl")
     include("ica.jl")
     include("fa.jl")
+    include("rrr.jl")
 
     ## deprecations
     @deprecate indim(f) size(f,1)

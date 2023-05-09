@@ -145,7 +145,7 @@ using Statistics: mean, cov, cor
     predict(M, YY, :y)
     predict(MM, XX, :x)
     predict(MM, YY, :y)
-    
+
     # type stability
     for func in (M->mean(M, :x), M->mean(M, :y),
                  M->projection(M, :x),
