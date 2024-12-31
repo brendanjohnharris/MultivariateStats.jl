@@ -3,10 +3,10 @@
 """
 Linear Principal Component Analysis
 """
-struct PCA{T<:Real} <: LinearDimensionalityReduction
-    mean::AbstractVector{T}     # sample mean: of length d (mean can be empty, which indicates zero mean)
-    proj::AbstractMatrix{T}     # projection matrix: of size d x p
-    prinvars::AbstractVector{T} # principal variances: of length p
+struct PCA{T<:Real,V<:AbstractVector{T},M<:AbstractMatrix{T}} <: LinearDimensionalityReduction
+    mean::V     # sample mean: of length d (mean can be empty, which indicates zero mean)
+    proj::M     # projection matrix: of size d x p
+    prinvars::V # principal variances: of length p
     tprinvar::T                 # total principal variance, i.e. sum(prinvars)
     tvar::T                     # total input variance
 end

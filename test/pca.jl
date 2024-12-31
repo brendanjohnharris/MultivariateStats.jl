@@ -21,7 +21,7 @@ import SparseArrays
           0.990598   1.22718   -0.882179
          -1.51861    0.725771  -0.631665
           0.181386  -1.21069   -0.557706]
-    M = PCA(Float64[], P, pvars, 15.0)
+    M = @inferred PCA(Float64[], P, pvars, 15.0)
 
     @test size(M) == (5, 3)
     @test size(M,1) == 5
@@ -61,6 +61,7 @@ import SparseArrays
     M = PCA(mval, P, pvars, 15.0)
 
     @test size(M) == (5,3)
+    @inferred mean(M)
     @test mean(M) == mval
     @test projection(M) == P
     @test principalvars(M) == pvars
