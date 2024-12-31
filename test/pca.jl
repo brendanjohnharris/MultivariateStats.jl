@@ -15,7 +15,7 @@ import SparseArrays
     Y = randn(rng, 3, 10)
 
     P = qr(randn(rng, 5, 5)).Q[:, 1:3]
-    pvars = [5., 4., 3.]
+    pvars = [5.0, 4.0, 3.0]
     l = [-0.236399  -0.706558  -1.21106
           1.27426   -0.047799  -0.212282
           0.990598   1.22718   -0.882179
@@ -27,20 +27,31 @@ import SparseArrays
     @test size(M,1) == 5
     @test size(M,2) == 3
     @test_throws AssertionError size(M, 3)
+    @inferred mean(M)
     @test mean(M) == zeros(5)
+    @inferred projection(M)
     @test projection(M) == P
+    @inferred principalvars(M)
     @test principalvars(M) == pvars
+    @inferred principalvar(M, 2)
     @test principalvar(M, 2) == pvars[2]
+    @inferred var(M)
     @test var(M) == 15.0
+    @inferred tprincipalvar(M)
     @test tprincipalvar(M) == 12.0
+    @inferred tresidualvar(M)
     @test tresidualvar(M) == 3.0
+    @inferred principalratio(M)
     @test principalratio(M) == 0.8
+    @inferred loadings(M)
     @test isapprox(loadings(M), l, atol = 0.001)
 
     @test predict(M, X[:,1]) ≈ P'X[:,1]
+    @inferred predict(M, X)
     @test predict(M, X) ≈ P'X
 
     @test reconstruct(M, Y[:,1]) ≈ P * Y[:,1]
+    @inferred reconstruct(M, Y)
     @test reconstruct(M, Y) ≈ P * Y
 
 
