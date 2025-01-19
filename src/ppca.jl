@@ -3,9 +3,9 @@
 """
 This type contains probabilistic PCA model parameters.
 """
-struct PPCA{T<:Real} <: LatentVariableDimensionalityReduction
-    mean::Vector{T}       # sample mean: of length d (mean can be empty, which indicates zero mean)
-    W::Matrix{T}          # weight matrix: of size d x p
+struct PPCA{T<:Real,V<:AbstractVector{T},M<:AbstractMatrix{T}} <: LatentVariableDimensionalityReduction
+    mean::V       # sample mean: of length d (mean can be empty, which indicates zero mean)
+    W::M          # weight matrix: of size d x p
     σ²::T                 # residual variance
 end
 
@@ -113,7 +113,7 @@ function ppcaml(Z::AbstractMatrix{T}, mean::Vector{T};
                 tol::Real=1.0e-6, # convergence tolerance
                 maxoutdim::Int=size(Z,1)-1) where {T<:Real}
 
-    check_pcaparams(size(Z,1), mean, maxoutdim, 1.)
+    check_pcaparams(size(Z, 1), mean, maxoutdim, 1.0)
 
     d, n = size(Z)
 
@@ -160,7 +160,7 @@ function ppcaem(S::AbstractMatrix{T}, mean::Vector{T}, n::Int;
                 tol::Real=1.0e-6,   # convergence tolerance
                 maxiter::Integer=1000) where {T<:Real}
 
-    check_pcaparams(size(S,1), mean, maxoutdim, 1.)
+    check_pcaparams(size(S, 1), mean, maxoutdim, 1.0)
 
     d = size(S,1)
     q = maxoutdim
@@ -171,7 +171,7 @@ function ppcaem(S::AbstractMatrix{T}, mean::Vector{T}, n::Int;
     M⁻¹ = inv(W'W .+ σ² * Iq)
 
     i = 1
-    L_old = 0.
+    L_old = 0.0
     chg = NaN
     converged = false
     while i < maxiter
@@ -226,7 +226,7 @@ function bayespca(S::AbstractMatrix{T}, mean::Vector{T}, n::Int;
                  tol::Real=1.0e-6,   # convergence tolerance
                  maxiter::Integer=1000) where {T<:Real}
 
-    check_pcaparams(size(S,1), mean, maxoutdim, 1.)
+    check_pcaparams(size(S, 1), mean, maxoutdim, 1.0)
 
     d = size(S,1)
     q = maxoutdim
@@ -241,7 +241,7 @@ function bayespca(S::AbstractMatrix{T}, mean::Vector{T}, n::Int;
 
     i = 1
     chg = NaN
-    L_old = 0.
+    L_old = 0.0
     converged = false
     while i < maxiter
         # EM-steps
@@ -273,7 +273,7 @@ function bayespca(S::AbstractMatrix{T}, mean::Vector{T}, n::Int;
     end
     converged || throw(ConvergenceException(maxiter, chg, oftype(chg, tol)))
 
-    return PPCA(mean, W[:,wnorm .> 0.], σ²)
+    return PPCA(mean, W[:, wnorm.>0.0], σ²)
 end
 
 ## interface functions
@@ -336,4 +336,3 @@ function fit(::Type{PPCA}, X::AbstractMatrix{T};
 
     return M::PPCA
 end
-

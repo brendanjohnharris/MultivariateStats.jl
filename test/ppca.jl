@@ -17,7 +17,7 @@ import StatsBase
 
     W = qr(randn(rng, 5, 5)).Q[:, 1:3]
     σ² = 0.1
-    M = PPCA(Float64[], W, σ²)
+    M = @inferred PPCA(Float64[], W, σ²)
 
     @test size(M) == (5,3)
     @test mean(M) == zeros(5)
@@ -25,10 +25,12 @@ import StatsBase
     @test var(M) == σ²
 
     T = inv(W'*W .+ σ²*Matrix(I, 3, 3))*W'
+    @inferred predict(M, X[:, 1])
     @test predict(M, X[:,1]) ≈ T * X[:,1]
     @test predict(M, X) ≈ T * X
 
     R = W*inv(W'W)*(W'W .+ σ²*Matrix(I, 3, 3))
+    @inferred reconstruct(M, Y[:, 1])
     @test reconstruct(M, Y[:,1]) ≈ R * Y[:,1]
     @test reconstruct(M, Y) ≈ R * Y
 
@@ -36,16 +38,18 @@ import StatsBase
     ## PCA with non-zero mean
 
     mval = rand(rng, 5)
-    M = PPCA(mval, W, σ²)
+    M = @inferred PPCA(mval, W, σ²)
 
     @test size(M) == (5,3)
     @test mean(M) == mval
     @test loadings(M) == W
     @test var(M) == σ²
 
+    @inferred predict(M, X[:, 1])
     @test predict(M, X[:,1]) ≈ T * (X[:,1] .- mval)
     @test predict(M, X) ≈ T * (X .- mval)
 
+    @inferred reconstruct(M, Y[:, 1])
     @test reconstruct(M, Y[:,1]) ≈ R * Y[:,1] .+ mval
     @test reconstruct(M, Y) ≈ R * Y .+ mval
 
@@ -67,9 +71,9 @@ import StatsBase
 
     ## ppcaml (default)
 
-    M = fit(PPCA, X)
-    P = projection(M)
-    W = loadings(M)
+    M = @inferred fit(PPCA, X)
+    P = @inferred projection(M)
+    W = @inferred loadings(M)
 
     @test size(M) == (5,4)
     @test mean(M) == mval
@@ -82,9 +86,9 @@ import StatsBase
     M = fit(PPCA, Z; mean=0)
     @test loadings(M) ≈ W
 
-    M = fit(PPCA, X; maxoutdim=3)
-    P = projection(M)
-    W = loadings(M)
+    M = @inferred fit(PPCA, X; maxoutdim=3)
+    P = @inferred projection(M)
+    W = @inferred loadings(M)
 
     @test size(M) == (5,3)
     @test P'P ≈ Matrix(I, 3, 3)
@@ -92,22 +96,22 @@ import StatsBase
     # ppcaem
 
     M = fit(PPCA, X; method=:em)
-    P = projection(M)
-    W = loadings(M)
+    P = @inferred projection(M)
+    W = @inferred loadings(M)
 
     @test size(M) == (5,4)
     @test mean(M) == mval
     @test P'P ≈ Matrix(I, 4, 4)
     @test all(isapprox.(reconstruct(M, predict(M, X)), reconstruct(M0, predict(M0, X)), atol=1e-2))
 
-    M = fit(PPCA, X; method=:em, mean=mval)
+    M = @inferred fit(PPCA, X; method=:em, mean=mval)
     @test loadings(M) ≈ W
 
-    M = fit(PPCA, Z; method=:em, mean=0)
+    M = @inferred fit(PPCA, Z; method=:em, mean=0)
     @test loadings(M) ≈ W
 
-    M = fit(PPCA, X; method=:em, maxoutdim=3)
-    P = projection(M)
+    M = @inferred fit(PPCA, X; method=:em, maxoutdim=3)
+    P = @inferred projection(M)
 
     @test size(M) == (5,3)
     @test P'P ≈ Matrix(I, 3, 3)
@@ -115,24 +119,24 @@ import StatsBase
     @test_throws StatsBase.ConvergenceException fit(PPCA, X; method=:em, maxiter=1)
 
     # bayespca
-    M0 = fit(PCA, X; mean=mval, maxoutdim = 3)
+    M0 = @inferred fit(PCA, X; mean=mval, maxoutdim=3)
 
-    M = fit(PPCA, X; method=:bayes)
-    P = projection(M)
-    W = loadings(M)
+    M = @inferred fit(PPCA, X; method=:bayes)
+    P = @inferred projection(M)
+    W = @inferred loadings(M)
 
     @test size(M) == (5,3)
     @test mean(M) == mval
     @test P'P ≈ Matrix(I, 3, 3)
     @test reconstruct(M, predict(M, X)) ≈ reconstruct(M0, predict(M0, X))
 
-    M = fit(PPCA, X; method=:bayes, mean=mval)
+    M = @inferred fit(PPCA, X; method=:bayes, mean=mval)
     @test loadings(M) ≈ W
 
-    M = fit(PPCA, Z; method=:bayes, mean=0)
+    M = @inferred fit(PPCA, Z; method=:bayes, mean=0)
     @test loadings(M) ≈ W
 
-    M = fit(PPCA, X; method=:em, maxoutdim=2)
+    M = @inferred fit(PPCA, X; method=:em, maxoutdim=2)
     P = projection(M)
 
     @test size(M) == (5,2)
@@ -149,14 +153,14 @@ import StatsBase
     YY = convert.(Float32, Y)
 
     for method in (:bayes, :em)
-        M = fit(PPCA, X ; maxoutdim=1, method=method)
-        MM = fit(PPCA, XX ; maxoutdim=1, method=method)
+        M = @inferred fit(PPCA, X; maxoutdim=1, method=method)
+        MM = @inferred fit(PPCA, XX; maxoutdim=1, method=method)
 
         # mix types
-        predict(M, XX)
-        predict(MM, X)
-        reconstruct(M, YY)
-        reconstruct(MM, Y)
+        @inferred predict(M, XX)
+        @inferred predict(MM, X)
+        @inferred reconstruct(M, YY)
+        @inferred reconstruct(MM, Y)
 
         # type consistency
         for func in (mean, projection, var, loadings)
@@ -167,9 +171,9 @@ import StatsBase
 
     # views
     X = randn(rng, 5, 200)
-    M = fit(PPCA, view(X, :, 1:100), maxoutdim=3)
-    M = fit(PPCA, view(X, :, 1:100), maxoutdim=3, method=:em)
-    M = fit(PPCA, view(X, :, 1:100), maxoutdim=3, method=:bayes)
+    M = @inferred fit(PPCA, view(X, :, 1:100), maxoutdim=3)
+    M = @inferred fit(PPCA, view(X, :, 1:100), maxoutdim=3, method=:em)
+    M = @inferred fit(PPCA, view(X, :, 1:100), maxoutdim=3, method=:bayes)
     # sparse
     @test_throws AssertionError fit(PPCA, SparseArrays.sprandn(rng, 100d, n, 0.6))
 
